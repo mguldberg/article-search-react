@@ -1,43 +1,64 @@
 const db = require("../models");
+const axios = require("axios");
 
-// Defining methods for the booksController
+// Defining methods for the articlesController
 module.exports = {
-  findNewArticles: function (req, res) {
+  findNewArticles: function (req, findNewArticlesResp) {
 
+    console.log("inside find New Articles");
+    console.log(req.query);
     // SETUP VARIABLES
     // =========================================
-    var authKey = "b9f91d369ff59547cd47b931d8cbc56b:0:74623931";
+    const authKey = "b9f91d369ff59547cd47b931d8cbc56b:0:74623931";
 
     // URL Base
-    var queryURLBase = "https://api.nytimes.com/svc/search/v2/articlesearch.json?api-key=" + authKey;
+    let queryURLBase = "https://api.nytimes.com/svc/search/v2/articlesearch.json";
 
-    axios.get({
-      baseURL: queryURLBase,
+    let beginDateVar = req.query.fromDate + "0101";
+    let endDateVar = req.query.toDate + "1231";
+    console.log(beginDateVar, endDateVar)
+
+    axios.get(queryURLBase, {
       params: {
-        q: req.body.query,
-        begin_date: req.body.fromDate,
-        end_date: req.body.toDate,
+        'api-key': authKey,
+        'q': req.query.search_topic,
+        'begin_date': beginDateVar,
+        'end_date': endDateVar,
       }
     })
-      .then(dbModel => {
+      .then(NYTData => {
 
+        // Need an object to return otherwise the res.json doesn't work ({ data: { response } })
         // Logging to Console
         console.log("------------------");
-        console.log(queryURL);
+        console.log(NYTData.data.response)
         console.log("------------------");
-        console.log(NYTData);
 
         //return the data to REACT on the front end
-        res.json(dbModel)
+        findNewArticlesResp.status(200).json(NYTData.data.response);
+
       })
-      .catch(err => res.status(422).json(err));
+      .catch(err => {
+        console.log("in error handler");
+        console.log(err)
+        res.status(422).json(err)
+      });
   },
   findAll: function (req, res) {
+    console.log("inside FindAll");
+    console.log("req.query", req.query);
+    
     db.Article
       .find(req.query)
       .sort({ date: -1 })
-      .then(dbModel => res.json(dbModel))
-      .catch(err => res.status(422).json(err));
+      .then(dbModel => {
+        console.log("in .then of findAll", dbModel);
+        res.json(dbModel)
+      })
+      .catch(err => {
+        console.log(err)
+        res.status(422).json(err);
+      })
   },
   findById: function (req, res) {
     db.Article
@@ -46,14 +67,22 @@ module.exports = {
       .catch(err => res.status(422).json(err));
   },
   create: function (req, res) {
+    console.log("inside of article add to the DB", req.body);
     db.Article
       .create(req.body)
-      .then(dbModel => res.json(dbModel))
-      .catch(err => res.status(422).json(err));
+      .then(dbModel => {
+        console.log("SUCCESS ***********************");
+        res.json(dbModel);
+      })
+      .catch(err => {
+        console.log("FAIL ***********************");
+        console.log(err);
+        res.status(422).json(err)
+      });
   },
   update: function (req, res) {
     db.Article
-      .findOneAndUpdate({ _id: req.params.id }, req.body)
+      .findOneAndUpdate({ _id: req.params.id }, { saved: true })
       .then(dbModel => res.json(dbModel))
       .catch(err => res.status(422).json(err));
   },
