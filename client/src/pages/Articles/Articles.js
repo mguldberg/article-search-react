@@ -160,7 +160,7 @@ class Articles extends Component {
             <Container>
               <Row >
                 <Col size="sm-12">
-                <h2 class="text-align-center">Saved Articles</h2>
+                <h2 className="text-align-center">Saved Articles</h2>
                   {this.state.savedArticles.length ? (
                     <List>
                       {this.state.savedArticles.map(savedArticles => (
