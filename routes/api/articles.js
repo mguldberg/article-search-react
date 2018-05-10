@@ -16,5 +16,5 @@ router
   // .get(articlesController.findById)
   .put(articlesController.update)
   .delete(articlesController.remove);
-  
+
 module.exports = router;

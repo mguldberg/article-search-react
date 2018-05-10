@@ -126,6 +126,8 @@ class Articles extends Component {
   render() {
     return (
       <Container fluid>
+      {/* <a href="/auth/google">Sign In with Google</a> */}
+
         <Row>
           <Col size="md-6">
             <Jumbotron>
